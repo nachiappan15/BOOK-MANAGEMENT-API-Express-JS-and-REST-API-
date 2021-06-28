@@ -45,11 +45,11 @@ const books = [
       name: "Deepak",
       books: ["12345ONE"],
     },
-    {
-        id: 3,
-        name: "Karthick",
-        books: ["12345THREE"],
-      },
+      {
+          id: 3,
+          name: "Karthick",
+          books: ["12345THREE"],
+        },
   ];
   
   const publications = [
@@ -67,3 +67,4 @@ const books = [
   
 // exporting database
 module.exports = {books,authors,publications};
+ 
