@@ -121,15 +121,15 @@ app.post("/books/new", (req, res) => {
     Parameter       isbn   
     Method          PUT
 */
-app.put("/books/update/title/:isbn" , (req,res) => {
+app.put("/books/update/title/:isbn", (req, res) => {
     const parameter = req.params.isbn;
     const updateble = req.body.newTitle;
-    database.books.forEach( book => {
-        if(book.ISBN === parameter){
+    database.books.forEach(book => {
+        if (book.ISBN === parameter) {
             book.title = updateble;
         }
     })
-    return res.json( {BOOK : database.books , MESSAGE : "title updated"} );
+    return res.json({ BOOK: database.books, MESSAGE: "title updated" });
 
 });
 
@@ -141,29 +141,91 @@ app.put("/books/update/title/:isbn" , (req,res) => {
     Parameter       isbn   
     Method          PUT
 */
-app.put("/books/update/author/:isbn" , (req,res) => {
+app.put("/books/update/author/:isbn", (req, res) => {
     const parameter = req.params.isbn;
     const updatable = req.body.newAuthor;
     console.log(updatable);
     // changing value in book
     database.books.forEach(i => {//getting the correct book
-        if(i.ISBN === parameter){
+        if (i.ISBN === parameter) {
             i.authors.push(updatable);
         }
     });
     // changing value of author in Authors
     database.authors.forEach(i => {
-        if(i.id === updatable){
+        if (i.id === updatable) {
             i.books.push(parameter);
         }
     })
 
-    return res.json( 
-        {BOOKS : database.books ,
-        AUTHORS : database.authors,
-    MESSAGE : "BOOKS and AUTHORS are updated"} );
+    return res.json(
+        {
+            BOOKS: database.books,
+            AUTHORS: database.authors,
+            MESSAGE: "BOOKS and AUTHORS are updated"
+        });
 
 });
+
+
+// ----------------------------- ( DELETING )  ----------------------------------
+/*
+    Route           /book/delete/:isbn
+    Data Required   books 
+    Description     to delete a book
+    Access          public  
+    Parameter       isbn   
+    Method          DELETE
+*/
+app.delete("/book/delete/:isbn", (req, res) => {
+    const parameter = req.params.isbn;
+    const updatedBookDatabase = database.books.filter(book =>
+        book.ISBN !== parameter
+    );
+    database.books = updatedBookDatabase;
+    return res.json({ BOOKS: database.books })
+});
+
+/*
+    Route           /book/delete/author/:isbn
+    Data Required   books 
+    Description     to delete an author from a book nad mutate the authors data
+    Access          public  
+    req.body        deleteAuthor (author id)
+    Parameter       isbn
+    Method          DELETE
+*/
+app.delete("/book/delete/author/:isbn" , (req,res) => {
+    const parameter = req.params.isbn;
+    const { deleteAuthor } = req.body;
+    // deleteing Author in BOOKS
+    database.books.forEach( book =>{
+        if(book.ISBN == parameter){
+            const newAuthorList  = book.authors.filter( author => author!= deleteAuthor);
+            console.log(newAuthorList);
+          return  book.authors = newAuthorList;
+        }
+    });
+    // deleting the book isbn in Authors database
+    database.authors.forEach(author => {
+        if(author.id == deleteAuthor){
+            const newBooksList =  author.books.filter(book => book!= parameter);
+            console.log(newBooksList);
+            return author.books = newBooksList;
+        }
+    });
+
+
+    return res.json({
+        BOOKS: database.books,
+        AUTHORS : database.authors,
+        MESSAGE: "Auhtor data deleted"
+    });
+
+
+
+});
+
 
 
 
@@ -242,22 +304,47 @@ app.post("/authors/new", (req, res) => {
     Parameter       id
     Method          PUT
 */
-app.put( "/authors/update/name/:id", (req,res) => {
+app.put("/authors/update/name/:id", (req, res) => {
     const parameter = req.params.id;
-    const { newName} = req.body;
+    const { newName } = req.body;
     database.authors.forEach(author => {
-        if(author.id == parameter){
+        if (author.id == parameter) {
             author.name = newName;
-            return res.json( { AUTHORS : database.authors , MESSAGE : "author name updated" });
+            return res.json({ AUTHORS: database.authors, MESSAGE: "author name updated" });
         }
-        
+
     });
-    
-    return res.json( { Error : `The given ID ${parameter} is not available`});
+
+    return res.json({ Error: `The given ID ${parameter} is not available` });
 
 });
+// ----------------------------- ( DELETING )  ----------------------------------
+/*
+    Route           /authors/delete/:id
+    Data Required   authors 
+    Description     to Delete an author
+    Access          public  
+    Parameter       id  
+    Method          DELETE
+*/
+app.delete("/authors/delete/:id" , (req,res)=>{
+    const parameter = parseInt(req.params.id);
+    // deleting author in authors database
+    const updatedAuthorDatabase = database.authors.filter(author =>author.id !==   parameter);
+    database.authors = updatedAuthorDatabase;
+    // mutating changes oin Books database
+    database.books.forEach(book => {
+        if(book.authors.includes(parameter)){
+            book.authors.splice(book.authors.indexOf(parameter),1);
+        }
+    })
 
-
+    return res.json({
+        MESSAGE : "AUTHOR data deleted",
+        AUTHORS : database.authors,
+        BOOKS : database.books
+    })
+});
 
 
 //    -------------     PUBLICATIONS      ----------------
@@ -319,10 +406,10 @@ app.get("/pub/isbn/:isbn", (req, res) => {
     Method          POST
 */
 
-app.post("/pub/new" , (req,res) =>{
+app.post("/pub/new", (req, res) => {
     const addable = req.body.newPublication;
     database.publications.push(addable);
-    return res.json( { PUBLICATIONS : database.publications , MESSAGE : "publications updated" });
+    return res.json({ PUBLICATIONS: database.publications, MESSAGE: "publications updated" });
 });
 
 
@@ -335,17 +422,17 @@ app.post("/pub/new" , (req,res) =>{
     Method          PUT
 */
 
-app.put( "/pub/update/name/:id", (req,res) => {
+app.put("/pub/update/name/:id", (req, res) => {
     const parameter = Number(req.params.id);
-    const {newName} = req.body;
+    const { newName } = req.body;
     database.publications.forEach(pub => {
-        if(pub.id === parameter){
+        if (pub.id === parameter) {
             pub.name = newName;
-            return res.json( { PUBLICATIONS : database.publications , MESSAGE : "Publication Name changed" } );
+            return res.json({ PUBLICATIONS: database.publications, MESSAGE: "Publication Name changed" });
         }
-        
+
     })
-    return res.json( { Error : `No publications available for the id ${parameter}` } );
+    return res.json({ Error: `No publications available for the id ${parameter}` });
 });
 
 /*
@@ -356,25 +443,81 @@ app.put( "/pub/update/name/:id", (req,res) => {
     Parameter       id   
     Method          PUT
 */
-app.put( "/pub/update/book/:id", (req,res) => {
+app.put("/pub/update/book/:id", (req, res) => {
     const parameter = Number(req.params.id);
-    const {newBook} = req.body;
+    const { newBook } = req.body;
     // adding book isbn in publications
     database.publications.forEach(pub => {
-        if(pub.id === parameter){
-            pub.books.push(newBook);
+        if (pub.id === parameter) {
+            return pub.books.push(newBook);
         }
-        
+
     })
     // mutating the books data
-    database.books.forEach( book => {
-        if(book.ISBN ==newBook){
-            book.publication = parameter;
-        } 
+    database.books.forEach(book => {
+        if (book.ISBN == newBook) {
+            return book.publication = parameter;
+        }
     });
-    return res.json( { BOOKs : database.books , PUBLICATIONS : database.publications , MESSAGE : "publications data updated"} );
+    return res.json({ BOOKs: database.books, PUBLICATIONS: database.publications, MESSAGE: "publications data updated" });
 });
+// ----------------------------- ( DELETING )  ----------------------------------
+/*
+    Route           /pub/delete/:id
+    Data Required   authors 
+    Description     to delete a publication
+    Access          public  
+    Parameter       id  
+    Method          DELETE
+*/
+app.delete("/pub/delete/:id" , (req,res)=>{
+    const parameter = parseInt(req.params.id);
+    // deleting author in authors database
+    const updatedPublicationDatabase = database.publications.filter(pub =>pub.id !==   parameter);
+    database.publications = updatedPublicationDatabase;
+    // mutating changes oin Books database
+    database.books.forEach(book => {
+        if(book.publication == parameter){
+            book.publication =0;
+        }
+    })
 
-
+    return res.json({
+        MESSAGE : "PUBLICATION data deleted",
+        AUTHORS : database.publications,
+        BOOKS : database.books
+    })
+});
+/*
+    Route           /pub/delete/book/:id
+    Data Required   authors 
+    Description     to delete a book from a publication
+    req.body        isbn of book
+    Access          public  
+    Parameter       id  
+    Method          DELETE
+*/
+app.delete("/pub/delete/book/:id" ,(req,res) =>{
+    const parameter =  req.params.id;//id of publictation to be modified
+    const {deleteBook} = req.body;//isbn of book to be deleted
+    // deleting book in publications
+    database.publications.forEach(pub => {
+        if(pub.id == parameter){
+            return pub.books.splice(pub.books.indexOf(deleteBook),1)
+        }
+    });
+    // mutating the books database
+    database.books.forEach(book=> {
+        if(book.ISBN == deleteBook)
+        {
+            return book.publication =0;
+        }
+    })
+    return res.json({
+        MESSAGE : "Given book is deleted in publications",
+        PUBLICATIONS : database.publications ,
+        BOOK : database.books
+    })
+});
 // listen to port 3000
 app.listen(3000, console.log("🚀----------SERVER STARTED-----------🚀"));
