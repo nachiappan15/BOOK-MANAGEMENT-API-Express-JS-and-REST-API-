@@ -14,6 +14,12 @@ mongoose.connect(process.env.MONGO_URL,{
 ).then(() => { console.log("connection established !!!") });
 
 
+// Models importing
+const BookModels = require("BookModels");
+const Authormodel = require("Authormodel");
+const PublicationModel = require("PublicationModel");
+
+
 
 
 // getting express
