@@ -1,3 +1,21 @@
+// ENV
+require("dotenv").config();
+
+
+// getting mongoose
+const mongoose = require("mongoose");
+// connecting to database
+mongoose.connect(process.env.MONGO_URL,{
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true
+    }
+).then(() => { console.log("connection established !!!") });
+
+
+
+
 // getting express
 const { json } = require("body-parser");
 const express = require("express");
@@ -195,21 +213,21 @@ app.delete("/book/delete/:isbn", (req, res) => {
     Parameter       isbn
     Method          DELETE
 */
-app.delete("/book/delete/author/:isbn" , (req,res) => {
+app.delete("/book/delete/author/:isbn", (req, res) => {
     const parameter = req.params.isbn;
     const { deleteAuthor } = req.body;
     // deleteing Author in BOOKS
-    database.books.forEach( book =>{
-        if(book.ISBN == parameter){
-            const newAuthorList  = book.authors.filter( author => author!= deleteAuthor);
+    database.books.forEach(book => {
+        if (book.ISBN == parameter) {
+            const newAuthorList = book.authors.filter(author => author != deleteAuthor);
             console.log(newAuthorList);
-          return  book.authors = newAuthorList;
+            return book.authors = newAuthorList;
         }
     });
     // deleting the book isbn in Authors database
     database.authors.forEach(author => {
-        if(author.id == deleteAuthor){
-            const newBooksList =  author.books.filter(book => book!= parameter);
+        if (author.id == deleteAuthor) {
+            const newBooksList = author.books.filter(book => book != parameter);
             console.log(newBooksList);
             return author.books = newBooksList;
         }
@@ -218,7 +236,7 @@ app.delete("/book/delete/author/:isbn" , (req,res) => {
 
     return res.json({
         BOOKS: database.books,
-        AUTHORS : database.authors,
+        AUTHORS: database.authors,
         MESSAGE: "Auhtor data deleted"
     });
 
@@ -327,22 +345,22 @@ app.put("/authors/update/name/:id", (req, res) => {
     Parameter       id  
     Method          DELETE
 */
-app.delete("/authors/delete/:id" , (req,res)=>{
+app.delete("/authors/delete/:id", (req, res) => {
     const parameter = parseInt(req.params.id);
     // deleting author in authors database
-    const updatedAuthorDatabase = database.authors.filter(author =>author.id !==   parameter);
+    const updatedAuthorDatabase = database.authors.filter(author => author.id !== parameter);
     database.authors = updatedAuthorDatabase;
     // mutating changes oin Books database
     database.books.forEach(book => {
-        if(book.authors.includes(parameter)){
-            book.authors.splice(book.authors.indexOf(parameter),1);
+        if (book.authors.includes(parameter)) {
+            book.authors.splice(book.authors.indexOf(parameter), 1);
         }
     })
 
     return res.json({
-        MESSAGE : "AUTHOR data deleted",
-        AUTHORS : database.authors,
-        BOOKS : database.books
+        MESSAGE: "AUTHOR data deleted",
+        AUTHORS: database.authors,
+        BOOKS: database.books
     })
 });
 
@@ -470,22 +488,22 @@ app.put("/pub/update/book/:id", (req, res) => {
     Parameter       id  
     Method          DELETE
 */
-app.delete("/pub/delete/:id" , (req,res)=>{
+app.delete("/pub/delete/:id", (req, res) => {
     const parameter = parseInt(req.params.id);
     // deleting author in authors database
-    const updatedPublicationDatabase = database.publications.filter(pub =>pub.id !==   parameter);
+    const updatedPublicationDatabase = database.publications.filter(pub => pub.id !== parameter);
     database.publications = updatedPublicationDatabase;
     // mutating changes oin Books database
     database.books.forEach(book => {
-        if(book.publication == parameter){
-            book.publication =0;
+        if (book.publication == parameter) {
+            book.publication = 0;
         }
     })
 
     return res.json({
-        MESSAGE : "PUBLICATION data deleted",
-        AUTHORS : database.publications,
-        BOOKS : database.books
+        MESSAGE: "PUBLICATION data deleted",
+        AUTHORS: database.publications,
+        BOOKS: database.books
     })
 });
 /*
@@ -497,26 +515,25 @@ app.delete("/pub/delete/:id" , (req,res)=>{
     Parameter       id  
     Method          DELETE
 */
-app.delete("/pub/delete/book/:id" ,(req,res) =>{
-    const parameter =  req.params.id;//id of publictation to be modified
-    const {deleteBook} = req.body;//isbn of book to be deleted
+app.delete("/pub/delete/book/:id", (req, res) => {
+    const parameter = req.params.id;//id of publictation to be modified
+    const { deleteBook } = req.body;//isbn of book to be deleted
     // deleting book in publications
     database.publications.forEach(pub => {
-        if(pub.id == parameter){
-            return pub.books.splice(pub.books.indexOf(deleteBook),1)
+        if (pub.id == parameter) {
+            return pub.books.splice(pub.books.indexOf(deleteBook), 1)
         }
     });
     // mutating the books database
-    database.books.forEach(book=> {
-        if(book.ISBN == deleteBook)
-        {
-            return book.publication =0;
+    database.books.forEach(book => {
+        if (book.ISBN == deleteBook) {
+            return book.publication = 0;
         }
     })
     return res.json({
-        MESSAGE : "Given book is deleted in publications",
-        PUBLICATIONS : database.publications ,
-        BOOK : database.books
+        MESSAGE: "Given book is deleted in publications",
+        PUBLICATIONS: database.publications,
+        BOOK: database.books
     })
 });
 // listen to port 3000
