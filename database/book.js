@@ -14,5 +14,5 @@ const BookSchema = mongoose.Schema({
 });
 // create book modal
 const BookModel = mongoose.model( "books",BookSchema);
-
-module.export = BookModel; 
+// exporting book model
+module.exports = BookModel; 
